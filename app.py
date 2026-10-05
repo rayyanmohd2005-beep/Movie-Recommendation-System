@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -8,8 +9,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Load Data
 # =========================
 
-movies = pd.read_csv("data/ml-latest-small/movies.csv")
-ratings = pd.read_csv("data/ml-latest-small/ratings.csv")
+if os.path.exists("data/ml-latest-small/movies.csv"):
+    movies_path = "data/ml-latest-small/movies.csv"
+    ratings_path = "data/ml-latest-small/ratings.csv"
+else:
+    movies_path = "movies.csv"
+    ratings_path = "ratings.csv"
+
+movies = pd.read_csv(movies_path)
+ratings = pd.read_csv(ratings_path)
 
 
 # =========================
@@ -22,7 +30,10 @@ st.set_page_config(
 )
 
 st.title("🎬 Movie Recommendation System")
-st.write("Find movies similar to your favorite movie and get personalized recommendations.")
+st.write(
+    "Find movies similar to your favorite movie "
+    "and get personalized recommendations."
+)
 
 
 # =========================
@@ -63,7 +74,6 @@ def recommend_movies(movie_title, n=5):
     recommendations = []
 
     for index, score in top_movies:
-
         recommendations.append({
             "Movie": movies.iloc[index]["title"],
             "Genres": movies.iloc[index]["genres"],
@@ -164,17 +174,14 @@ user_id = st.number_input(
 
 if st.button("🍿 Recommend Movies"):
 
-    # Content-based recommendations
     recommendations = recommend_movies(movie_title)
 
     st.subheader("🎬 Similar Movies")
-
     st.dataframe(
         recommendations,
         hide_index=True
     )
 
-    # Collaborative recommendations
     st.subheader("👤 Personalized Recommendations")
 
     personalized = collaborative_recommendations(
